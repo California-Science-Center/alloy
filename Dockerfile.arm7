@@ -28,9 +28,13 @@ RUN npm install --global yarn && apt-get autoremove -y && apt-get clean && rm -r
 RUN --mount=type=cache,target=/src/alloy/web/ui/node_modules,sharing=locked \
    make generate-ui
 
+# Install cross-compilation toolchain
+RUN apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} \
+    CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ \
     RELEASE_BUILD=${RELEASE_BUILD} VERSION=${VERSION} \
     GO_TAGS="netgo builtinassets promtail_journal_enabled" \
     GOEXPERIMENT=${GOEXPERIMENT} \
